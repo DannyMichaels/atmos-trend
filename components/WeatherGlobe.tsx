@@ -37,6 +37,8 @@ type WeatherGlobeProps = {
   initialLat?: number;
   initialLng?: number;
   initialAltitude?: number;
+  zoomOnSelect?: boolean;
+  autoRotate?: boolean;
   maxSize?: number;
 };
 
@@ -48,6 +50,8 @@ function WeatherGlobe({
   initialLat,
   initialLng,
   initialAltitude = 1.8,
+  zoomOnSelect = true,
+  autoRotate = true,
   maxSize = 600,
 }: WeatherGlobeProps) {
   const globeRef = useRef<any>(null);
@@ -73,24 +77,27 @@ function WeatherGlobe({
     return () => window.removeEventListener('resize', handleResize);
   }, [maxSize]);
 
-  // Initial setup
+  // Initial setup — use rAF to ensure globe internals are ready
   useEffect(() => {
-    if (!globeRef.current) return;
-    const controls = globeRef.current.controls();
-    controls.autoRotate = true;
-    controls.autoRotateSpeed = 0.5;
+    const raf = requestAnimationFrame(() => {
+      if (!globeRef.current) return;
+      const controls = globeRef.current.controls();
+      controls.autoRotate = autoRotate;
+      controls.autoRotateSpeed = 0.5;
 
-    if (initialLat != null && initialLng != null) {
-      globeRef.current.pointOfView(
-        { lat: initialLat, lng: initialLng, altitude: initialAltitude },
-        0
-      );
-    }
-  }, [initialLat, initialLng, initialAltitude]);
+      if (initialLat != null && initialLng != null) {
+        globeRef.current.pointOfView(
+          { lat: initialLat, lng: initialLng, altitude: initialAltitude },
+          0
+        );
+      }
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [initialLat, initialLng, initialAltitude, autoRotate]);
 
   // Zoom to country when selectedAlpha2 changes externally
   useEffect(() => {
-    if (!selectedAlpha2 || !globeRef.current) return;
+    if (!zoomOnSelect || !selectedAlpha2 || !globeRef.current) return;
     const match = countriesJson.find(
       (c) => c['Alpha-2 code'].toUpperCase() === selectedAlpha2.toUpperCase()
     );
@@ -105,7 +112,7 @@ function WeatherGlobe({
       },
       600
     );
-  }, [selectedAlpha2]);
+  }, [selectedAlpha2, zoomOnSelect]);
 
   // Build polygon data
   const polygonsData = useMemo(() => {
@@ -130,23 +137,6 @@ function WeatherGlobe({
       .filter((c) => c.Country.toLowerCase().includes(searchValue.toLowerCase()))
       .slice(0, 8);
   }, [searchValue, showSearch]);
-
-  // Find closest country from initial coords
-  const initialCountry = useMemo(() => {
-    if (initialLat == null || initialLng == null) return null;
-    let closest: (typeof filteredCountries)[number] | null = null;
-    let minDist = Infinity;
-    for (const c of filteredCountries) {
-      const dLat = c['Latitude (average)'] - initialLat;
-      const dLng = c['Longitude (average)'] - initialLng;
-      const dist = dLat * dLat + dLng * dLng;
-      if (dist < minDist) {
-        minDist = dist;
-        closest = c;
-      }
-    }
-    return closest?.Country ?? null;
-  }, [initialLat, initialLng]);
 
   const selectAndZoom = useCallback(
     (name: string, alpha2Code: string, lat: number, lng: number) => {
@@ -182,13 +172,13 @@ function WeatherGlobe({
     [selectAndZoom]
   );
 
-  // Active country: explicit prop > user click > initial coords
+  // Active country: explicit prop > user click
   const activeCountry = selectedAlpha2
     ? polygonsData.find(
         (p: any) =>
           p.alpha2Code?.toUpperCase() === selectedAlpha2.toUpperCase()
       )?.country ?? focusedCountry
-    : focusedCountry ?? initialCountry;
+    : focusedCountry;
 
   // Memoized globe callbacks
   const polygonAltitude = useCallback(

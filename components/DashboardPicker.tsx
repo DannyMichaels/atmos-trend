@@ -8,8 +8,24 @@ import { Button } from '@tremor/react';
 import { GlobeIcon } from '@heroicons/react/solid';
 import GlobeDynamic from './GlobeDynamic';
 import { filteredCountries } from './WeatherGlobe';
+import findCountryAtPoint from '@/lib/findCountryAtPoint';
 import type { IState, ICity } from 'country-state-city';
 import type { CountryOption, CityOption, StateOption } from '@/types/city-picker';
+
+function getInitialCountry(lat: string, long: string): CountryOption {
+  const alpha2 = findCountryAtPoint(Number(lat), Number(long));
+  if (!alpha2) return null;
+  const match = Country.getAllCountries().find((c) => c.isoCode === alpha2);
+  if (!match) return null;
+  return {
+    value: {
+      latitude: match.latitude,
+      longitude: match.longitude,
+      isoCode: match.isoCode,
+    },
+    label: match.name,
+  };
+}
 
 type Props = {
   lat: string;
@@ -18,7 +34,9 @@ type Props = {
 
 export default function DashboardPicker({ lat, long }: Props) {
   const router = useRouter();
-  const [selectedCountry, setSelectedCountry] = useState<CountryOption>(null);
+  const [selectedCountry, setSelectedCountry] = useState<CountryOption>(
+    () => getInitialCountry(lat, long)
+  );
   const [selectedState, setSelectedState] = useState<StateOption>(null);
   const [selectedCity, setSelectedCity] = useState<CityOption>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -108,16 +126,18 @@ export default function DashboardPicker({ lat, long }: Props) {
 
   return (
     <div className="space-y-4">
-      {/* Globe — no overlays, zoomed out 40% more */}
+      {/* Globe — no overlays, zoomed in on current country */}
       <div className="rounded-xl overflow-hidden mx-auto" style={{ maxHeight: 220 }}>
         <GlobeDynamic
           showSearch={false}
           showBadge={false}
           initialLat={Number(lat)}
           initialLng={Number(long)}
-          initialAltitude={2.5}
+          initialAltitude={1.5}
+          autoRotate={false}
           maxSize={260}
           selectedAlpha2={selectedCountry?.value.isoCode ?? null}
+          zoomOnSelect={false}
           onCountrySelect={handleGlobeCountrySelect}
         />
       </div>
