@@ -24,4 +24,4 @@ weather data including UV index, temperature, rainfall, and humidity.
 |       Open AI       | _NPM Package to interact with the openai api_                                                     |
 |       Tailwind      | _Front-end css framework_                                                                         |
 |       Tremor        | _React component library_                                                                         |
-|       react-globe.gl | _3D glove for country select, based off of Three.js                                            |
+|       react-globe.gl | _3D glove for country select, based off of Three.js                                              |
