@@ -1,6 +1,7 @@
-import { MoonIcon, SunIcon } from '@heroicons/react/solid';
+import { ArrowLeftIcon, MoonIcon, SunIcon } from '@heroicons/react/solid';
 import Image from 'next/image';
-import CityPicker from './CityPicker';
+import Link from 'next/link';
+import DashboardPicker from './DashboardPicker';
 import weatherCodeToString from '@/lib/weatherCodeToString';
 import { Root } from '@/types/weather';
 import celsiusToFahrenheit from '@/lib/convertCelciusToFarenheit';
@@ -15,6 +16,15 @@ type Props = {
 function InformationPanel({ city, lat, long, results }: Props) {
   return (
     <div className="bg-gradient-to-br from-[#f961e4] to-[#4063F2] text-white p-10">
+      <Link
+        href="/"
+        className="inline-flex items-center space-x-2 text-white/80 hover:text-white
+                   transition-colors mb-4"
+      >
+        <ArrowLeftIcon className="h-5 w-5" />
+        <span className="text-sm">Back to Home</span>
+      </Link>
+
       <div className="pb-5">
         <h1 className="text-6xl font-bold">{decodeURI(city)}</h1>
         <p className="text-xs text-white-400">
@@ -22,7 +32,7 @@ function InformationPanel({ city, lat, long, results }: Props) {
         </p>
       </div>
 
-      <CityPicker />
+      <DashboardPicker lat={lat} long={long} />
 
       <hr className="my-10" />
 

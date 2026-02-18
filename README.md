@@ -17,11 +17,11 @@ weather data including UV index, temperature, rainfall, and humidity.
 
 ### Libraries and Dependencies
 
-|      Library      | Description                                                                                       |
-| :---------------: | :------------------------------------------------------------------------------------------------ |
-|       Next.js     | _Full-stack client and server_                                                                    |
-|       Axios       | _NPM Package to help make API requests_                                                           |
-|       Open AI     | _NPM Package to interact with the openai api_                                                     |
-|       Tailwind    | _Front-end css framework_                                                                         |
-|       StepZen     | _Build GraphQL Easily Optimize & Scale GraphQL Automatically_                                     |
-|       Tremor      | _React component library_                                                                         |
+|      Library        | Description                                                                                       |
+| :---------------:   | :------------------------------------------------------------------------------------------------ |
+|       Next.js       | _Full-stack client and server_                                                                    |
+|       Axios         | _NPM Package to help make API requests_                                                           |
+|       Open AI       | _NPM Package to interact with the openai api_                                                     |
+|       Tailwind      | _Front-end css framework_                                                                         |
+|       Tremor        | _React component library_                                                                         |
+|       react-globe.gl | _3D glove for country select, based off of Three.js                                            |

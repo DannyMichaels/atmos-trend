@@ -1,9 +1,5 @@
-import { getClient } from '@/apollo-client';
-
 // lib
-import fetchWeatherQuery from '@/graphql/queries/fetchWeatherQuery';
-import celsiusToFahrenheit from '@/lib/convertCelciusToFarenheit';
-import kmhToMph from '@/lib/kmhToMph';
+import fetchWeather from '@/lib/fetchWeather';
 import { Root } from '@/types/weather';
 
 // components
@@ -26,20 +22,11 @@ type Props = {
 
 // can do async in server component
 async function WeatherPage({ params: { city, lat, long } }: Props) {
-  const client = getClient();
-
-  const { data } = await client.query({
-    query: fetchWeatherQuery,
-    variables: {
-      current_weather: 'true',
-      longitude: long,
-      latitude: lat,
-      // timezone: 'America/New_York',
-      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-    },
-  });
-
-  const results: Root = data.myQuery;
+  const results: Root = await fetchWeather(
+    lat,
+    long,
+    Intl.DateTimeFormat().resolvedOptions().timeZone
+  );
 
   return (
     <div className="flex flex-col min-h-screen lg:flex-row">
@@ -63,9 +50,6 @@ async function WeatherPage({ params: { city, lat, long } }: Props) {
           <WeatherStats results={results} />
         </div>
 
-        {/* <div className="flex-auto">
-       
-        </div> */}
         <hr className="mb-5" />
 
         <div className="space-y-3">

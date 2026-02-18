@@ -1,5 +1,4 @@
-'use client'; // components in next 13 are server components by default, so we need to convert it to client component so we can use state
-// https://nextjs.org/docs/getting-started/react-essentials
+'use client';
 
 // hooks
 import { useMemo, useState } from 'react';
@@ -17,12 +16,23 @@ import { GlobeIcon } from '@heroicons/react/solid';
 import { ICountry, ICity, IState } from 'country-state-city';
 import { CityOption, CountryOption, StateOption } from '@/types/city-picker';
 
-function CityPicker() {
-  const [selectedCountry, setSelectedCountry] = useState<CountryOption>(null);
+type CityPickerProps = {
+  /** When provided, the country dropdown is hidden and this value is used instead. */
+  externalCountry?: CountryOption;
+  hideCountrySelect?: boolean;
+};
+
+function CityPicker({
+  externalCountry,
+  hideCountrySelect = false,
+}: CityPickerProps = {}) {
+  const [internalCountry, setInternalCountry] = useState<CountryOption>(null);
   const [selectedCity, setSelectedCity] = useState<CityOption>(null);
   const [selectedState, setSelectedState] = useState<StateOption>(null);
 
   const router = useRouter();
+
+  const selectedCountry = externalCountry ?? internalCountry;
 
   const countryCode = useMemo(
     () => selectedCountry?.value.isoCode || '',
@@ -33,7 +43,6 @@ function CityPicker() {
     [selectedState]
   );
 
-  // react select needs the value key, so we need to map the original countries and add value
   const countryOptions = Country.getAllCountries().map((country: ICountry) => ({
     value: {
       latitude: country.latitude,
@@ -70,7 +79,7 @@ function CityPicker() {
   );
 
   const handleCountryChange = (option: CountryOption) => {
-    setSelectedCountry(option);
+    setInternalCountry(option);
     setSelectedState(null);
     setSelectedCity(null);
   };
@@ -88,27 +97,30 @@ function CityPicker() {
     if (!selectedCountry?.value) return;
 
     const option = selectedCity?.value || selectedState?.value;
+    if (!option?.name) return;
 
     router.push(
-      `/location/${option?.name}/${option?.latitude}/${option?.longitude}`
+      `/location/${option.name}/${option.latitude}/${option.longitude}`
     );
   };
 
   return (
     <div className="space-y-4">
-      <div className="space-y-2" id="country-select">
-        <div className="flex items-center space-x-2 text-white/80">
-          <GlobeIcon className="h-5 w-5 text-white" />
-          <label htmlFor="country">Country</label>
+      {!hideCountrySelect && (
+        <div className="space-y-2" id="country-select">
+          <div className="flex items-center space-x-2 text-white/80">
+            <GlobeIcon className="h-5 w-5 text-white" />
+            <label htmlFor="country">Country</label>
+          </div>
+          <Select
+            name="country"
+            value={selectedCountry}
+            onChange={handleCountryChange}
+            options={countryOptions}
+            className="text-black"
+          />
         </div>
-        <Select
-          name="country"
-          value={selectedCountry}
-          onChange={handleCountryChange}
-          options={countryOptions}
-          className="text-black"
-        />
-      </div>
+      )}
 
       {selectedCountry?.value && (
         <>
@@ -116,10 +128,10 @@ function CityPicker() {
             <div className="space-y-2" id="state-select">
               <div className="flex items-center space-x-2 text-white/80">
                 <GlobeIcon className="h-5 w-5 text-white" />
-                <label htmlFor="city">State</label>
+                <label htmlFor="state">State</label>
               </div>
               <Select
-                name="city"
+                name="state"
                 value={selectedState}
                 onChange={handleStateChange}
                 options={stateOptions}

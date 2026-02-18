@@ -8,4 +8,5 @@ body {
 
 .tremor-Card-root {
   background-color: #424242 !important;
+  backdrop-filter: blur(12px);
 }

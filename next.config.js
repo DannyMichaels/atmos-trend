@@ -6,6 +6,7 @@ const nextConfig = {
   experimental: {
     serverComponentsExternalPackages: ['@tremor/react'],
   },
+  transpilePackages: ['react-globe.gl'],
 };
 
 module.exports = nextConfig;
